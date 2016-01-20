@@ -4,6 +4,8 @@ import javax.crypto.NoSuchPaddingException;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.util.Date;
@@ -14,9 +16,6 @@ import java.util.Scanner;
 public class ServerConnection extends Thread {
 
     private Socket cliente;
-    /* private static PrintWriter sendData;
-    private static DataInputStream receivedBytes;
-    private static DataOutputStream sendBytes;*/
     private FirmarServidorValidarCliente firmarSVerificarC = new FirmarServidorValidarCliente();
     private LinkedList<Integer> IdsRegistros = new LinkedList<>();
     private LinkedList<Long> IdsOperacion = new LinkedList<>();
@@ -89,9 +88,6 @@ public class ServerConnection extends Thread {
             System.out.println("Tipo de confidencialidad-> " + tipoConfidencialidad);
 
             /*** GUARDANDO EL ARCHIVO ***/
-
-            //DataOutputStream escribir = new DataOutputStream(new ByteArrayOutputStream());
-
             String selloTemporal = new Date().toString();
 
             ByteArrayOutputStream escribirfirma = new ByteArrayOutputStream();
@@ -108,16 +104,17 @@ public class ServerConnection extends Thread {
             byte[] firmaServidor = firmarSVerificarC.getFirmaServidor();
             File guardado;
             Archivo archivo;
+            String extension = nombreDoc.split("\\.")[1];
             if (peticion.isPrivado()) {
                 String nombre = String.valueOf(idRegistro) + "_" + idpropietario + ".sig.cif";
                 byte[] docCifrado = firmarSVerificarC.cifrarDoc(peticion.getDocumento());
-                archivo = new Archivo(idRegistro, nombreDoc, idpropietario, selloTemporal, true, docCifrado, peticion.getFirmaDoc(), firmaServidor, firmarSVerificarC.getEncoding());
+                archivo = new Archivo(idRegistro, nombreDoc, extension, idpropietario, selloTemporal, true, docCifrado, peticion.getFirmaDoc(), firmaServidor, firmarSVerificarC.getEncoding());
                 listaArchivos.add(archivo);
                 guardado = new File(nombre);
                 System.out.println("Documento guardado\n");
             } else {
                 String nombre = String.valueOf(idRegistro) + "_" + idpropietario + ".sig";
-                archivo = new Archivo(idRegistro, nombreDoc, idpropietario, selloTemporal, false, peticion.getDocumento(), peticion.getFirmaDoc(), firmaServidor, null);
+                archivo = new Archivo(idRegistro, nombreDoc, extension,idpropietario, selloTemporal, false, peticion.getDocumento(), peticion.getFirmaDoc(), firmaServidor, null);
                 listaArchivos.add(archivo);
                 guardado = new File(nombre);
                 System.out.println("Documento guardado\n");
@@ -190,24 +187,32 @@ public class ServerConnection extends Thread {
                     boolean validoCliente;
                     validoCliente = firmarSVerificarC.verificarFirmaCliente(sigCliente, peticion.getFirmaCliente());
                     if(!validoCliente){
-                        RespuestaRecuperar respuesta = new RespuestaRecuperar(idRegistro, "Acceso no permitido", null, null, null, "", false);
+                        RespuestaRecuperar respuesta = new RespuestaRecuperar(idRegistro, "Acceso no permitido", null, null, null, null, "", false);
                         sendObject.writeObject(respuesta);
                         System.out.println("Firma cliente no valida \nEnviando respuesta...\n");
                     }else{
-                        byte[] docDescifrado = firmarSVerificarC.descifrarDoc(listaArchivos.get(i).getDoc(), listaArchivos.get(i).getEncoding());
-                        RespuestaRecuperar respuesta = new RespuestaRecuperar(idRegistro, "Documento recuperado correctamente", docDescifrado, listaArchivos.get(i).getFirmaServidor(), listaArchivos.get(i).getFirmaCliente(), listaArchivos.get(i).getSelloTemporal(), true);
+                        String ruta = String.valueOf(idRegistro) + "_" + idpropietario + ".sig.cif";
+                        ObjectInputStream leerObjeto = new ObjectInputStream(new FileInputStream(ruta));
+                        Archivo provisional = (Archivo) leerObjeto.readObject();
+                        leerObjeto.close();
+                        byte[] docDescifrado = firmarSVerificarC.descifrarDoc(provisional.getDoc(), listaArchivos.get(i).getEncoding());
+                        RespuestaRecuperar respuesta = new RespuestaRecuperar(idRegistro, "Documento recuperado correctamente", listaArchivos.get(i).getExtension(),docDescifrado, listaArchivos.get(i).getFirmaServidor(), listaArchivos.get(i).getFirmaCliente(), listaArchivos.get(i).getSelloTemporal(), true);
                         sendObject.writeObject(respuesta);
                         System.out.println("Documento recuperado correctamente\nEnviando respuesta...\n");
                     }
                 } else {
-                    byte[] docRec = listaArchivos.get(i).getDoc();
-                    RespuestaRecuperar respuesta = new RespuestaRecuperar(idRegistro, "Documento recuperado correctamente", docRec, listaArchivos.get(i).getFirmaServidor(), listaArchivos.get(i).getFirmaCliente(), listaArchivos.get(i).getSelloTemporal(), true);
+                    String ruta = String.valueOf(idRegistro) + "_" + idpropietario + ".sig";
+                    ObjectInputStream leerObjeto = new ObjectInputStream(new FileInputStream(ruta));
+                    Archivo provisional = (Archivo) leerObjeto.readObject();
+                    leerObjeto.close();
+                    byte[] docRec = provisional.getDoc();
+                    RespuestaRecuperar respuesta = new RespuestaRecuperar(idRegistro, "Documento recuperado correctamente", listaArchivos.get(i).getExtension(),docRec, listaArchivos.get(i).getFirmaServidor(), listaArchivos.get(i).getFirmaCliente(), listaArchivos.get(i).getSelloTemporal(), true);
                     sendObject.writeObject(respuesta);
                     System.out.println("(no validar cliente) Documento recuperado correctamente\nEnviando respuesta...\n");
                 }
 
             } else {
-                RespuestaRecuperar respuesta = new RespuestaRecuperar(idRegistro, "Documento no existente", null, null, null, "", false);
+                RespuestaRecuperar respuesta = new RespuestaRecuperar(idRegistro, "Documento no existente", null, null, null, null, "", false);
                 System.out.println("Documento no existente " + idRegistro + " " + idpropietario + "\n\n");
                 sendObject.writeObject(respuesta);
             }

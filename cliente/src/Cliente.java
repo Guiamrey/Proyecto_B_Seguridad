@@ -40,9 +40,8 @@ public class Cliente {
         try {
 
             SSLSocketFactory socketFactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
-
-           /* *//**************  Suites SSL  *******************//*
-             String[] suites = socketFactory.getSupportedCipherSuites();
+            /**************  Suites SSL  *******************/
+            /* String[] suites = socketFactory.getSupportedCipherSuites();
             System.out.println("******** CypherSuites Disponibles **********");
             for (int i = 0; i < suites.length; i++) {
                 System.out.println(i+1+".- "+suites[i]);
@@ -223,11 +222,12 @@ public class Cliente {
 
                 byte[] sigServ = escribirfirma.toByteArray();
                 escribirfirma.close();
-               // boolean valida = true;
+                // boolean valida = true;
                 boolean valida = firmarcliente.verificarServidor(sigServ, respuesta.getFirmaServidor());
                 if (valida) {
                     /*******Firma servidor validada****/
-                    File recuperado = new File("recuperado_" + respuesta.getIdRegistro() + ".jpg");
+
+                    File recuperado = new File("recuperado_" + respuesta.getIdRegistro() + "." + respuesta.getExtension());
                     DataOutputStream nuevofichero = new DataOutputStream(new FileOutputStream(recuperado));
                     nuevofichero.write(respuesta.getDoc());
                     nuevofichero.close();

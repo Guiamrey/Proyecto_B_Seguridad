@@ -7,14 +7,16 @@ public class Archivo implements Serializable{
     private String idPropietario;
     private String selloTemporal;
     private boolean privado;
+    private String extension;
     private byte[] doc;
     private byte[] firmaCliente;
     private byte[] firmaServidor;
     private byte[] encoding;
 
-    public Archivo(int idRegistro, String nombredoc, String idPropietario, String selloTemporal, boolean privado, byte[] doc, byte[] firmaCliente, byte[] firmaServidor, byte[] encoding){
+    public Archivo(int idRegistro, String nombredoc, String extension, String idPropietario, String selloTemporal, boolean privado, byte[] doc, byte[] firmaCliente, byte[] firmaServidor, byte[] encoding){
         this.idRegistro = idRegistro;
         this.nombredoc = nombredoc;
+        this.extension = extension;
         this.idPropietario = idPropietario;
         this.selloTemporal = selloTemporal;
         this.privado = privado;
@@ -22,6 +24,10 @@ public class Archivo implements Serializable{
         this.firmaCliente = firmaCliente;
         this.firmaServidor = firmaServidor;
         this.encoding = encoding;
+    }
+
+    public String getExtension() {
+        return extension;
     }
 
     public int getIdRegistro() {

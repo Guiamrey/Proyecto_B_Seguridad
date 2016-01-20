@@ -6,18 +6,24 @@ public class RespuestaRecuperar implements Serializable {
     private String mensaje;
     byte[] firmaServidor;
     private byte[] doc;
+    private String extension;
     private String selloTemporal;
     private boolean correcto;
     private byte[] firmaCliente;
 
-    public RespuestaRecuperar(long idRegistro, String mensaje, byte[] doc, byte[] firmaServidor, byte[] firmaCliente, String selloTemporal, boolean correcto){
+    public RespuestaRecuperar(long idRegistro, String mensaje, String extension, byte[] doc, byte[] firmaServidor, byte[] firmaCliente, String selloTemporal, boolean correcto){
         this.idRegistro = idRegistro;
         this.selloTemporal = selloTemporal;
         this.doc = doc;
+        this.extension = extension;
         this.mensaje = mensaje;
         this.firmaCliente = firmaCliente;
         this.firmaServidor = firmaServidor;
         this.correcto = correcto;
+    }
+
+    public String getExtension() {
+        return extension;
     }
 
     public byte[] getDoc() {
