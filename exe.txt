@@ -1,4 +1,4 @@
-REGISTRAR_DOCUMENTO pires image2.jpg privado
-REGISTRAR_DOCUMENTO pires image1.jpg publico
+REGISTRAR_DOCUMENTO pires foto2.jpg privado
+REGISTRAR_DOCUMENTO pires foto1.jpg publico
 RECUPERAR_DOCUMENTO pires 1
 EXIT
