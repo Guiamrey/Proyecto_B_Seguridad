@@ -17,8 +17,6 @@ public class FirmaClienteVerificarServidor {
     }
 
     public void FirmarDocumento(byte[] documento) {
-
-
         try {
             String algoritmo;
             int longbloque;
@@ -32,7 +30,6 @@ public class FirmaClienteVerificarServidor {
             } else {
                 algoritmo = "SHA1withDSA";
             }
-
             //Creacion del objeto para firmar y inicializacion del objeto
             Signature object = Signature.getInstance(algoritmo);
             object.initSign(privateKey);
@@ -79,6 +76,7 @@ public class FirmaClienteVerificarServidor {
         int longbloque;
         byte bloque[] = new byte[1024];
 
+        System.out.println("Inicio de la verificación del servidor...");
         ByteArrayInputStream validar = new ByteArrayInputStream(sigServC);
         ClavePublica();
         if (publicKey.getAlgorithm().equalsIgnoreCase("RSA")) {
@@ -107,10 +105,14 @@ public class FirmaClienteVerificarServidor {
     private static PrivateKey ClavePrivada() throws KeyStoreException, IOException, UnrecoverableEntryException, NoSuchAlgorithmException, CertificateException {
 
         KeyStore keyStore;
-        char[] passwordKeystore = "cliente".toCharArray();
+       /* char[] passwordKeystore = "cliente".toCharArray();
         char[] passwordPrivateKey = "cliente".toCharArray();
         String pathkeystore = "keystores/clientekeystore.jce";
-        String SKCliente = "cliente";
+        String SKCliente = "cliente";*/
+        char[] passwordKeystore = "cambiala".toCharArray();
+        char[] passwordPrivateKey = "cambiala".toCharArray();
+        String pathkeystore = "JCKES/keystore_cliente2014.jce";
+        String SKCliente = "cliente_dsa";
        // String SKCliente = "firmadoc";
 
         keyStore = KeyStore.getInstance("JCEKS");
@@ -118,15 +120,17 @@ public class FirmaClienteVerificarServidor {
         KeyStore.PrivateKeyEntry privateKeyEntry = (KeyStore.PrivateKeyEntry)
                 keyStore.getEntry(SKCliente, new KeyStore.PasswordProtection(passwordPrivateKey));
         privateKey = privateKeyEntry.getPrivateKey();
-        System.out.println(privateKey);
         return privateKey;
     }
 
-    public static void ClavePublica() throws Exception {
+    private static void ClavePublica() throws Exception {
         KeyStore keyStore;
-        char[] passwordKeystore = "servidor".toCharArray();
+        /*char[] passwordKeystore = "servidor".toCharArray();
         String pathkeystore = "keystores/servidorkeystore.jce";
-        String SKServidor = "servidorrsa";
+        String SKServidor = "servidorrsa";*/
+        char[] passwordKeystore = "cambiala".toCharArray();
+        String pathkeystore = "JCKES/keystore_servidor2014.jce";
+        String SKServidor = "servidor_dsa";
       /*  char[] passwordKeystore = "cliente".toCharArray();
         String pathkeystore = "cliente_cacerts.jce";
         String SKServidor = "servidor";*/

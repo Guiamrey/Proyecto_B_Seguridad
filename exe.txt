@@ -1,7 +1,4 @@
-REGISTRAR_DOCUMENTO ruth image3.jpg publico
-REGISTRAR_DOCUMENTO pires image2.jpg privado
+REGISTRAR_DOCUMENTO pires image3.jpg privado
 REGISTRAR_DOCUMENTO pires image1.jpg publico
-REGISTRAR_DOCUMENTO ruth image2.jpg privado
-RECUPERAR_DOCUMENTO ruth 1
-LISTAR_DOCUMENTOS ruth
+RECUPERAR_DOCUMENTO pires 1
 EXIT

@@ -77,7 +77,7 @@ public class FirmarServidorValidarCliente {
         int longclave = 128;
         int longbloque;
 
-            System.out.println("Cifrando documento: " + algoritmo + "-" + longclave);
+            System.out.println("Cifrando documento...");
             Cipher cifrador = Cipher.getInstance(algoritmo + transformacion);
             cifrador.init(Cipher.ENCRYPT_MODE, key);
             ByteArrayInputStream textoclaro = new ByteArrayInputStream(doc);
@@ -102,7 +102,7 @@ public class FirmarServidorValidarCliente {
         return encoding;
     }
 
-    private byte[] descifrarDoc(byte[] docCifrado, byte[] encoding) throws Exception {
+    public byte[] descifrarDoc(byte[] docCifrado, byte[] encoding) throws Exception {
 
         System.out.println("Descifrando documento...");
 
@@ -125,7 +125,6 @@ public class FirmarServidorValidarCliente {
         AlgorithmParameters params = AlgorithmParameters.getInstance(algoritmo, provider);
         params.init(encoding);
 
-        System.out.println("Descifrando documento: " + algoritmo + "-" + longclave);
         Cipher descifrador = Cipher.getInstance(algoritmo + transformacion, provider);
         descifrador.init(Cipher.DECRYPT_MODE, key, params);
 
@@ -148,14 +147,14 @@ public class FirmarServidorValidarCliente {
 
     }
 
-    public boolean verificarFirmaCliente(String nombreFile, byte[] firmacliente, PublicKey publicKey) throws IOException, InvalidKeyException, NoSuchAlgorithmException, SignatureException {
+    public boolean verificarFirmaCliente(byte[] sigCliente, byte[] firmacliente) throws IOException, InvalidKeyException, NoSuchAlgorithmException, SignatureException {
         String algoritmo;
         int longbloque;
         byte bloque[] = new byte[1024];
 
-        FileInputStream file = null;
-        file = new FileInputStream(nombreFile);
-
+        System.out.println("Inicio de la verificación del cliente...");
+        ByteArrayInputStream validar = new ByteArrayInputStream(sigCliente);
+        ClavePublica();
         if (publicKey.getAlgorithm().equalsIgnoreCase("RSA")) {
             algoritmo = "MD5withRSA";
         } else {
@@ -163,50 +162,55 @@ public class FirmarServidorValidarCliente {
         }
         //Creacion del objeto para firmar y inicializacion del objeto
         Signature object = Signature.getInstance(algoritmo);
-        System.out.println("** INICIANDO VERIFICACIÓN DEL CLIENTE **");
         object.initVerify(publicKey);
-        while ((longbloque = file.read(bloque)) > 0) {
+        while ((longbloque = validar.read(bloque)) > 0) {
             object.update(bloque, 0, longbloque);
         }
-        file.close();
-        System.out.println("** FIN DE LA VERIFICACIÓN **");
+        validar.close();
 
         if (object.verify(firmacliente)) {
-            System.out.println("FIRMA VÁLIDA\n");
+            System.out.println("Firma del cliente correcta\n");
             return true;
         } else {
-            System.out.println("FIRMA INCORRECTA\n");
+            System.out.println("Firma del cliente no valida\n");
             return false;
         }
 
     }
 
-    private PublicKey ClavePublica() {
+    private static void ClavePublica() {
 
         KeyStore keyStore;
-        char[] passwordKeystore = "cliente".toCharArray();
+        /*char[] passwordKeystore = "cliente".toCharArray();
         String pathkeystore = "keystores/clientekeystore.jce";
-        String SKCliente = "cliente";
+        String SKCliente = "cliente";*/
+        char[] passwordKeystore = "cambiala".toCharArray();
+        String pathkeystore = "JCKES/keystore_cliente2014.jce";
+        String SKCliente = "cliente_dsa";
       /*  char[] passwordKeystore = "cliente".toCharArray(); //anton
         String pathkeystore = "servidor_cacerts.jce";
         String SKCliente = "firmadoc";*/
-        PublicKey publicKey = null;
+        PublicKey publickey = null;
         try {
             keyStore = KeyStore.getInstance("JCEKS");
             keyStore.load(new FileInputStream(pathkeystore), passwordKeystore);
-            publicKey = keyStore.getCertificate(SKCliente).getPublicKey();
+            publickey = keyStore.getCertificate(SKCliente).getPublicKey();
         } catch (CertificateException | IOException | NoSuchAlgorithmException | KeyStoreException e) {
             e.printStackTrace();
         }
-        return publicKey;
+        publicKey = publickey;
     }
 
     private PrivateKey ClavePrivada() {
         KeyStore keyStore;
-        char[] passwordKeystore = "servidor".toCharArray();
+        /*char[] passwordKeystore = "servidor".toCharArray();
         char[] passwordPrivateKey = "servidor".toCharArray();
         String pathkeystore = "keystores/servidorkeystore.jce";
-        String SKServidor = "servidordsa";
+        String SKServidor = "servidordsa";*/
+        char[] passwordKeystore = "cambiala".toCharArray();
+        char[] passwordPrivateKey = "cambiala".toCharArray();
+        String pathkeystore = "JCKES/keystore_servidor2014.jce";
+        String SKServidor = "servidor_dsa";
        /* char[] passwordKeystore = "cliente".toCharArray(); //anton
         char[] passwordPrivateKey = "cliente".toCharArray();
         String pathkeystore = "servidor.jce";

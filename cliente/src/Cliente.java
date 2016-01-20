@@ -15,8 +15,10 @@ public class Cliente {
 
     static String SKCliente = "cliente"; //DSA
     static String SKServidor = "servidorrsa"; //DSA
-    static String pathkeystore = "keystores/clientekeystore.jce";
-    static String pathtruststore = "keystores/clientetruststore.jce";
+    /*static String pathkeystore = "keystores/clientekeystore.jce";
+    static String pathtruststore = "keystores/clientetruststore.jce";*/
+    static String pathkeystore = "KEYS/CLIENTE/ksCliente.jce";
+    static String pathtruststore = "KEYS/CLIENTE/tsCliente.jce";
     /*static String pathkeystore = "cliente.jce";
      static String pathtruststore = "cliente_cacerts.jce";*/
     static BufferedReader receivedData;
@@ -199,7 +201,7 @@ public class Cliente {
         try {
             /*****************Crear firma**************/
             añadir.writeUTF(idPropietario);
-            añadir.writeLong(idRegistro);
+            añadir.writeInt(idRegistro);
             byte[] firmaCliente = firma.toByteArray();
             firma.close();
             FirmaClienteVerificarServidor firmarcliente = new FirmaClienteVerificarServidor();

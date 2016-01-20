@@ -13,8 +13,10 @@ import java.util.Scanner;
 
 public class Servidor {
 
-    static String pathkeystore = "keystores/servidorkeystore.jce";
-    static String pathtruststore = "keystores/servidortruststore.jce";
+   /* static String pathkeystore = "keystores/servidorkeystore.jce";
+    static String pathtruststore = "keystores/servidortruststore.jce";*/
+   static String pathkeystore = "KEYS/SERVIDOR/ksServidor.jce";
+    static String pathtruststore = "KEYS/SERVIDOR/tsServidor.jce";
 /*    static String pathkeystore = "servidor.jce";
     static String pathtruststore = "servidor_cacerts.jce";*/
 
@@ -26,64 +28,9 @@ public class Servidor {
         SSLServerSocketFactory serverSocketFactory = (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
        try {
 
-            /**********************
-            try {
-                String contrasena = "cliente";
-                MessageDigest md = MessageDigest.getInstance("MD5");
-                md.update(contrasena.getBytes("UTF-8"));
-                byte[] digest = md.digest();
 
-                KeyStore ks;
-                char[] password = "cliente".toCharArray();
-                SecretKey digestAlmacenado;
-                Boolean contrasenaCorrecta = false;
-
-                ks = KeyStore.getInstance("JCEKS");
-                ks.load(new FileInputStream("servidor.jce"), password);
-                KeyStore.SecretKeyEntry ksEntry = (KeyStore.SecretKeyEntry) ks.getEntry("digest", new KeyStore.PasswordProtection(password));
-                if (ksEntry == null) {
-                    System.out.println("No existe contraseña guardada, se guarda la actual");
-                    digestAlmacenado = new SecretKeySpec(digest, 0, digest.length, "DES");
-                    KeyStore.SecretKeyEntry skEntry = new KeyStore.SecretKeyEntry(digestAlmacenado);
-                    KeyStore.ProtectionParameter protParam = new KeyStore.PasswordProtection(password);
-                    ks.setEntry("digest", skEntry, protParam);
-                    ks.store(new FileOutputStream("servidor.jce"), password);
-                    contrasenaCorrecta = true;
-                } else {
-                    digestAlmacenado = ksEntry.getSecretKey();
-                    byte[] digestAlmacenadoBytes = digestAlmacenado.getEncoded();
-                    if (Arrays.equals(digest, digestAlmacenadoBytes)) {
-                        contrasenaCorrecta = true;
-                    }
-                }
-
-                if (contrasenaCorrecta) {
-                    System.out.println("La contraseña es correcta");
-                    try {
-                        SSLServerSocketFactory ssf = (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
-                        serverSocket = ssf.createServerSocket(9050);
-                    } catch (IOException e) {
-                        System.out.println("No se ha podidio iniciar el servidor: "
-                                + e.getMessage());
-                        e.printStackTrace();
-                    }
-                } else {
-                    System.out.println("La contraseña es incorrecta");
-                }
-            } catch (IOException e) {
-                System.out.println("\n ********* Error al introducir las contraseñas");
-                e.printStackTrace();
-            } catch (CertificateException e) {
-                e.printStackTrace();
-            } catch (NoSuchAlgorithmException e) {
-                e.printStackTrace();
-            } catch (UnrecoverableEntryException e) {
-                e.printStackTrace();
-            } catch (KeyStoreException e) {
-                e.printStackTrace();
-            }
             //TLS
-            ***********************/
+            /***********************/
             ServerSocket serverSocket = serverSocketFactory.createServerSocket(puerto);
             System.out.println("\n**** Servidor en funcionamiento ****\n");
            ((SSLServerSocket) serverSocket).setNeedClientAuth(true);
