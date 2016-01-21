@@ -29,12 +29,12 @@ public class FirmaClienteVerificarServidor {
                 algoritmo = "SHA1withDSA";
             }
             //Creacion del objeto para firmar y inicializacion del objeto
-            Signature object = Signature.getInstance(algoritmo);
-            object.initSign(privateKey);
+            Signature signer = Signature.getInstance(algoritmo);
+            signer.initSign(privateKey);
             while ((longbloque = mensaje.read(bloque)) > 0) {
-                object.update(bloque, 0, longbloque);
+                signer.update(bloque, 0, longbloque);
             }
-            firmacliente = object.sign();
+            firmacliente = signer.sign();
             System.out.println("Documento firmado. Firma: ");
             for (int i = 0; i < firmacliente.length; i++)
                 System.out.print(firmacliente[i] + " ");
@@ -79,15 +79,15 @@ public class FirmaClienteVerificarServidor {
             algoritmo = "SHA1withDSA";
         }
         // Creamos un objeto para verificar
-        Signature object = Signature.getInstance(algoritmo);
+        Signature verifier = Signature.getInstance(algoritmo);
 
         // Inicializamos el objeto para verificar
-        object.initVerify(publicKey);
+        verifier.initVerify(publicKey);
         while ((longbloque = validar.read(bloque)) > 0) {
-            object.update(bloque, 0, longbloque);
+            verifier.update(bloque, 0, longbloque);
         }
         validar.close();
-        if (object.verify(firmaServ)) {
+        if (verifier.verify(firmaServ)) {
             System.out.println("Firma del servidor correcta");
             return true;
         } else {

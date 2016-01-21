@@ -1,4 +1,7 @@
-REGISTRAR_DOCUMENTO pires foto4.jpg privado
+REGISTRAR_DOCUMENTO pires foto6.jpg privado
 REGISTRAR_DOCUMENTO pires foto1.jpg publico
 RECUPERAR_DOCUMENTO pires 1
+REGISTRAR_DOCUMENTO ruth foto5.jpg privado
+REGISTRAR_DOCUMENTO pires foto4.jpg publico
+LISTAR_DOCUMENTOS pires
 EXIT

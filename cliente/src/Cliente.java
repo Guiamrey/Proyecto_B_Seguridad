@@ -13,15 +13,8 @@ import java.util.Scanner;
 
 public class Cliente {
 
-    static String pathkeystore = "keystores/clientekeystore.jce";
-    static String pathtruststore = "keystores/clientetruststore.jce";
-    static BufferedReader receivedData;
     static PrintWriter sendData;
-    static DataInputStream receivedBytes;
-    static DataOutputStream sendBytes;
     static FirmaClienteVerificarServidor firmaCliente;
-
-
     private static ObjectInputStream receivedObject;
     private static ObjectOutputStream sendObject;
 
@@ -34,26 +27,24 @@ public class Cliente {
         try {
 
             SSLSocketFactory socketFactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
-            /**************  Suites SSL  *******************/
+            /**************  Suites SSL  Disponibles *******************/
             /* String[] suites = socketFactory.getSupportedCipherSuites();
             System.out.println("******** CypherSuites Disponibles **********");
             for (int i = 0; i < suites.length; i++) {
                 System.out.println(i+1+".- "+suites[i]);
-            }*/
+            }
+            String suiteSSL;
+            Scanner consola = new Scanner(System.in);
+            String cadena = consola.nextLine();*/
             /***************************************************/
             SSLSocket SSLsocket = (SSLSocket) socketFactory.createSocket(host, puerto);
             SSLsocket.startHandshake();
             System.out.println("**** Conexion con el servidor correctamente establecida **** \n");
 
-            receivedData = new BufferedReader(new InputStreamReader(SSLsocket.getInputStream()));
             sendData = new PrintWriter(new BufferedWriter(new OutputStreamWriter(SSLsocket.getOutputStream())), true);
-            receivedBytes = new DataInputStream(SSLsocket.getInputStream());
-            sendBytes = new DataOutputStream(SSLsocket.getOutputStream());
             firmaCliente = new FirmaClienteVerificarServidor();
-
             sendObject = new ObjectOutputStream(SSLsocket.getOutputStream());
             receivedObject = new ObjectInputStream(SSLsocket.getInputStream());
-
 
         } catch (IOException e) {
             System.out.println("****** Error al introducir las contraseñas o error en el HandShake\n" + e.getMessage());
@@ -153,10 +144,10 @@ public class Cliente {
             System.out.println("Respuesta del servidor...\n");
             RespuestaRegistro respuesta = (RespuestaRegistro) receivedObject.readObject();
             if (respuesta.isCorrecto()) {
-                System.out.println(respuesta.getMensaje());
+                System.out.println("Documento correctamente registrado");
                 System.out.println("IdRegistro: " + respuesta.getIdRegistro());
                 System.out.println("Sello temporal: " + respuesta.getSelloTemporal());
-                System.out.println("Firma del servidor: " + respuesta.getFirmaServidor());
+                System.out.println("Firma del servidor: " + respuesta.getFirmaServidor().toString());
                 /************Crear hash(documento)***********/
                 String hashD = "hash_" + String.valueOf(respuesta.getIdRegistro()) + idpropietario + ".txt";
                 byte[] hashDoc = SHA256(documento);
@@ -165,7 +156,7 @@ public class Cliente {
             } else {
                 int error = respuesta.getMensaje();
                 String mensaje;
-                switch (error){
+                switch (error) {
                     case 1:
                         mensaje = "Verificación de la firma del documento del cliente en el servidor no valida";
                         break;
@@ -236,35 +227,32 @@ public class Cliente {
                     boolean ficherosIguales = ficherosIguales(respuesta.getDoc(), concat);
                     /*********************Comprobar hash del documento almacenado y del recuperado*************************/
                     if (ficherosIguales) {
-                        System.out.println(respuesta.getMensaje());
+                        System.out.println("Documento recuperado correctamente");
                         System.out.println("IdRegistro: " + respuesta.getIdRegistro());
                         System.out.println("Sello temporal: " + respuesta.getSelloTemporal());
-                        System.out.println("Firma del servidor: " + respuesta.getFirmaServidor());
+                        System.out.println("Firma del servidor: " + respuesta.getFirmaServidor().toString());
                     } else {
-                        int error = respuesta.getMensaje();
-                        String mensaje;
-                        switch (error){
-                            case 1:
-                                mensaje = "Verificación de la firma del documento del cliente en el servidor no valida";
-                                break;
-                            default:
-                                mensaje = "Error desconocido";
-                                break;
-                        }
-                        System.out.println("ERROR: " + mensaje + "\n\n");
+                       System.out.println("Documento alterado por el registrador");
                     }
+                    //Ya se imprime el error en la funcion de validar
                 }
             } else {
-
-
-                System.out.println("ERROR: " + respuesta.getMensaje() + "\n\n");
+                int error = respuesta.getMensaje();
+                String mensaje;
+                switch (error) {
+                    case 1:
+                        mensaje = "Documento no existente";
+                        break;
+                    case 2:
+                        mensaje = "Acceso no permitido";
+                        break;
+                    default:
+                        mensaje = "Error desconocido";
+                        break;
+                }
+                System.out.println("ERROR: " + mensaje + "\n\n");
             }
 
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -338,24 +326,25 @@ public class Cliente {
                     System.out.println("- " + doc);
                 }
             }
-
-
         } catch (IOException e) {
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
 
-
     }
 
     public static void definirKeystores() {
-        System.out.println("Valores de las contraseñas de los stores: \n(keyStoreFile) contraseñaKeystore (trustStoreFile) contraseñaTruststore)\n");
+        System.out.println("Valores de las contraseñas de los stores (Cliente): \n(keyStoreFile) contraseñaKeystore (trustStoreFile) contraseñaTruststore)\n");
         Scanner consola = new Scanner(System.in);
         String cadena = consola.nextLine();
         String[] aux = cadena.split(" ");
+        //String keystrore = aux[0];
+        //String truststore = aux[2];
         String passwKS = aux[0];
         String passwTS = aux[1];
+        String pathkeystore = "keystores/clientekeystore.jce";
+        String pathtruststore = "keystores/clientetruststore.jce";
 
         // Tipo de KeyStore usados
         System.setProperty("javax.net.ssl.keyStoreType", "JCEKS");

@@ -12,27 +12,25 @@ import java.util.Arrays;
 import java.util.Scanner;
 
 public class Servidor {
+    static String algCifrado;
 
-    static String pathkeystore = "keystores/servidorkeystore.jce";
-    static String pathtruststore = "keystores/servidortruststore.jce";
-
-    public static void main(String[] args){
+    public static void main(String[] args) {
 
         int puerto = 9050;
         definirKeystore();
         SSLServerSocketFactory serverSocketFactory = (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
-       try {
+        try {
 
             //TLS
             /***********************/
             ServerSocket serverSocket = serverSocketFactory.createServerSocket(puerto);
             System.out.println("\n**** Servidor en funcionamiento ****\n");
-           ((SSLServerSocket) serverSocket).setNeedClientAuth(true);
+            ((SSLServerSocket) serverSocket).setNeedClientAuth(true);
 
             try {
-                while(true){
+                while (true) {
                     Socket cliente = serverSocket.accept();
-                    ServerConnection serverConnection = new ServerConnection(cliente);
+                    ServerConnection serverConnection = new ServerConnection(cliente, algCifrado);
                     serverConnection.run();
                 }
             } catch (IOException e) {
@@ -43,24 +41,27 @@ public class Servidor {
         } catch (IOException e) {
             System.out.println("\n ********* Error al introducir las contraseñas");
         }
-
-
     }
 
     private static void definirKeystore() {
-        System.out.println("Valores de las contraseñas de los stores: \n(keyStoreFile) contraseñaKeystore (trustStoreFile) contraseñaTruststore)\n");
+        System.out.println("Valores de las contraseñas de los stores (Servidor): \n(keyStoreFile) contraseñaKeystore (trustStoreFile) contraseñaTruststore) algoritmoCifrado (AES-128/ARCFOUR)\n");
         Scanner consola = new Scanner(System.in);
         String cadena = consola.nextLine();
         String[] aux = cadena.split(" ");
+        //String keystrore = aux[0];
+        //String truststore = aux[2];
         String passwKS = aux[0];
         String passwTS = aux[1];
+        String pathkeystore = "keystores/servidorkeystore.jce";
+        String pathtruststore = "keystores/servidortruststore.jce";
+        algCifrado = aux[2];
 
         // Contraseña del keystore del cliente
         System.setProperty("javax.net.ssl.keyStorePassword", passwKS);
         // Tipo de KeyStore usados
         System.setProperty("javax.net.ssl.keyStoreType", "JCEKS");
         // Path al keystore del cliente
-        System.setProperty("javax.net.ssl.keyStore",pathkeystore);
+        System.setProperty("javax.net.ssl.keyStore", pathkeystore);
 
         // Contraseña del trustore del cliente
         System.setProperty("javax.net.ssl.trustStorePassword", passwTS);

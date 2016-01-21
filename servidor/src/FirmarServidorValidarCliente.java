@@ -9,7 +9,7 @@ public class FirmarServidorValidarCliente {
     private static PrivateKey privateKeyServ;
     private static PublicKey publicKey;
     private static byte[] firma;
-    byte [] encoding;
+    byte[] encoding;
 
     public FirmarServidorValidarCliente() {
     }
@@ -27,13 +27,12 @@ public class FirmarServidorValidarCliente {
             } else {
                 algoritmo = "SHA1withDSA";
             }
-            Signature object = null;
-            object = Signature.getInstance(algoritmo);
-            object.initSign(privateKeyServ);
+            Signature signer = Signature.getInstance(algoritmo);
+            signer.initSign(privateKeyServ);
             while ((longbloque = mensaje.read(bloque)) > 0) {
-                object.update(bloque, 0, longbloque);
+                signer.update(bloque, 0, longbloque);
             }
-            firma = object.sign();
+            firma = signer.sign();
             System.out.println("Documento firmado. Firma: ");
             for (int i = 0; i < firma.length; i++) {
                 System.out.print(firma[i] + " ");
@@ -52,7 +51,39 @@ public class FirmarServidorValidarCliente {
         return firma;
     }
 
-    public byte[] cifrarDoc(byte[] doc) throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException, UnrecoverableEntryException, InvalidKeyException, NoSuchPaddingException, BadPaddingException, IllegalBlockSizeException {
+    public boolean verificarFirmaCliente(byte[] sigCliente, byte[] firmacliente) throws IOException, InvalidKeyException, NoSuchAlgorithmException, SignatureException {
+        String algoritmo;
+        int longbloque;
+        byte bloque[] = new byte[1024];
+
+        System.out.println("Inicio de la verificación del cliente...");
+        ByteArrayInputStream validar = new ByteArrayInputStream(sigCliente);
+        ClavePublica();
+        if (publicKey.getAlgorithm().equalsIgnoreCase("RSA")) {
+            algoritmo = "MD5withRSA";
+        } else {
+            algoritmo = "SHA1withDSA";
+        }
+        //Creacion del objeto para firmar y inicializacion del objeto
+        Signature verifier = Signature.getInstance(algoritmo);
+        verifier.initVerify(publicKey);
+        while ((longbloque = validar.read(bloque)) > 0) {
+            verifier.update(bloque, 0, longbloque);
+        }
+        validar.close();
+
+        if (verifier.verify(firmacliente)) {
+            System.out.println("Firma del cliente correcta\n");
+            return true;
+        } else {
+            System.out.println("Firma del cliente no valida\n");
+            return false;
+        }
+
+    }
+
+
+    public byte[] cifrarDoc(byte[] doc, String algCifrado) throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException, UnrecoverableEntryException, InvalidKeyException, NoSuchPaddingException, BadPaddingException, IllegalBlockSizeException {
 
         KeyStore keyStores;
         char[] contraseña = "cliente".toCharArray();
@@ -64,28 +95,35 @@ public class FirmarServidorValidarCliente {
         SecretKey secretKey = ksEntry.getSecretKey();
 
         String provider = "SunJCE";
-        byte enClaro[] = new byte[2024];
-        byte cifrado[];
-        String algoritmo = "AES";
-        String transformacion = "/CBC/PKCS5Padding";
+        byte bloqueclaro[] = new byte[2024];
+        byte bloquecifrado[];
+        String algoritmo;
+
         int tamañoClave = 128;
         int longbloque;
 
-            System.out.println("Cifrando documento...");
-            Cipher cifrador = Cipher.getInstance(algoritmo + transformacion);
-            cifrador.init(Cipher.ENCRYPT_MODE, secretKey);
-            ByteArrayInputStream docSinCifrar = new ByteArrayInputStream(doc);
-            ByteArrayOutputStream yaCifrado = new ByteArrayOutputStream();
+        if(algCifrado.equalsIgnoreCase("AES-128")){
+            algoritmo = "AES/CBC/PKCS5Padding";
+        }else {
+            algoritmo = "ARCFOUR";
+        }
 
-            while ((longbloque = docSinCifrar.read(enClaro)) > 0) {
-                cifrado = cifrador.update(enClaro, 0, longbloque);
-                yaCifrado.write(cifrado);
-            }
-            cifrado = cifrador.doFinal();
-            yaCifrado.write(cifrado);
-            System.out.println("Documento cifrado> " + algoritmo + "-" + tamañoClave + " Proveedor: " + provider);
-            yaCifrado.close();
-            docSinCifrar.close();
+        ByteArrayInputStream docSinCifrar = new ByteArrayInputStream(doc);
+        ByteArrayOutputStream yaCifrado = new ByteArrayOutputStream();
+
+        System.out.println("Cifrando documento...");
+        Cipher cifrador = Cipher.getInstance(algoritmo);
+        cifrador.init(Cipher.ENCRYPT_MODE, secretKey);
+
+        while ((longbloque = docSinCifrar.read(bloqueclaro)) > 0) {
+            bloquecifrado = cifrador.update(bloqueclaro, 0, longbloque);
+            yaCifrado.write(bloquecifrado);
+        }
+        bloquecifrado = cifrador.doFinal();
+        yaCifrado.write(bloquecifrado);
+        System.out.println("Documento cifrado> " + algoritmo + "-" + tamañoClave + " Proveedor: " + provider);
+        yaCifrado.close();
+        docSinCifrar.close();
 
         byte[] docCifrado = yaCifrado.toByteArray();
         encoding = cifrador.getParameters().getEncoded();
@@ -110,64 +148,33 @@ public class FirmarServidorValidarCliente {
         SecretKey key = ksEntry.getSecretKey();
 
         String provider = "SunJCE";
-        byte enClaro[];
-        byte cifrado[] = new byte[1024];
+        byte bloqueclaro[];
+        byte bloquecifrado[] = new byte[1024];
         String algoritmo = "AES";
         String transformacion = "/CBC/PKCS5Padding";
         int longbloque;
         AlgorithmParameters params = AlgorithmParameters.getInstance(algoritmo, provider);
         params.init(encoding);
 
-        Cipher descifrador = Cipher.getInstance(algoritmo + transformacion, provider);
-        descifrador.init(Cipher.DECRYPT_MODE, key, params);
-
         ByteArrayInputStream textocifrado = new ByteArrayInputStream(docCifrado);
         ByteArrayOutputStream textoclaro = new ByteArrayOutputStream();
 
-        while ((longbloque = textocifrado.read(cifrado)) > 0) {
-            enClaro = descifrador.update(cifrado, 0, longbloque);
-            textoclaro.write(enClaro);
+        Cipher descifrador = Cipher.getInstance(algoritmo + transformacion, provider);
+        descifrador.init(Cipher.DECRYPT_MODE, key, params);
+
+        while ((longbloque = textocifrado.read(bloquecifrado)) > 0) {
+            bloqueclaro = descifrador.update(bloquecifrado, 0, longbloque);
+            textoclaro.write(bloqueclaro);
         }
 
-        enClaro = descifrador.doFinal();
+        bloqueclaro = descifrador.doFinal();
 
         System.out.println("Documento descifrado.");
-        textoclaro.write(enClaro);
+        textoclaro.write(bloqueclaro);
         textocifrado.close();
         textoclaro.close();
         byte[] docRec = textoclaro.toByteArray();
         return docRec;
-
-    }
-
-    public boolean verificarFirmaCliente(byte[] sigCliente, byte[] firmacliente) throws IOException, InvalidKeyException, NoSuchAlgorithmException, SignatureException {
-        String algoritmo;
-        int longbloque;
-        byte bloque[] = new byte[1024];
-
-        System.out.println("Inicio de la verificación del cliente...");
-        ByteArrayInputStream validar = new ByteArrayInputStream(sigCliente);
-        ClavePublica();
-        if (publicKey.getAlgorithm().equalsIgnoreCase("RSA")) {
-            algoritmo = "MD5withRSA";
-        } else {
-            algoritmo = "SHA1withDSA";
-        }
-        //Creacion del objeto para firmar y inicializacion del objeto
-        Signature object = Signature.getInstance(algoritmo);
-        object.initVerify(publicKey);
-        while ((longbloque = validar.read(bloque)) > 0) {
-            object.update(bloque, 0, longbloque);
-        }
-        validar.close();
-
-        if (object.verify(firmacliente)) {
-            System.out.println("Firma del cliente correcta\n");
-            return true;
-        } else {
-            System.out.println("Firma del cliente no valida\n");
-            return false;
-        }
 
     }
 
