@@ -13,14 +13,8 @@ import java.util.Scanner;
 
 public class Cliente {
 
-    static String SKCliente = "cliente"; //DSA
-    static String SKServidor = "servidorrsa"; //DSA
-    /*static String pathkeystore = "keystores/clientekeystore.jce";
-    static String pathtruststore = "keystores/clientetruststore.jce";*/
-    static String pathkeystore = "KEYS/CLIENTE/ksCliente.jce";
-    static String pathtruststore = "KEYS/CLIENTE/tsCliente.jce";
-    /*static String pathkeystore = "cliente.jce";
-     static String pathtruststore = "cliente_cacerts.jce";*/
+    static String pathkeystore = "keystores/clientekeystore.jce";
+    static String pathtruststore = "keystores/clientetruststore.jce";
     static BufferedReader receivedData;
     static PrintWriter sendData;
     static DataInputStream receivedBytes;
@@ -169,14 +163,20 @@ public class Cliente {
                 Files.write(Paths.get(hashD), hashDoc);
                 /**************hash(documento) creado *****************/
             } else {
-                System.out.println("ERROR: " + respuesta.getMensaje() + "\n\n");
+                int error = respuesta.getMensaje();
+                String mensaje;
+                switch (error){
+                    case 1:
+                        mensaje = "Verificación de la firma del documento del cliente en el servidor no valida";
+                        break;
+                    default:
+                        mensaje = "Error desconocido";
+                        break;
+                }
+                System.out.println("ERROR: " + mensaje + "\n\n");
             }
 
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
+        } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
 
@@ -241,10 +241,22 @@ public class Cliente {
                         System.out.println("Sello temporal: " + respuesta.getSelloTemporal());
                         System.out.println("Firma del servidor: " + respuesta.getFirmaServidor());
                     } else {
-                        System.out.println("Documento alterado por el registrador");
+                        int error = respuesta.getMensaje();
+                        String mensaje;
+                        switch (error){
+                            case 1:
+                                mensaje = "Verificación de la firma del documento del cliente en el servidor no valida";
+                                break;
+                            default:
+                                mensaje = "Error desconocido";
+                                break;
+                        }
+                        System.out.println("ERROR: " + mensaje + "\n\n");
                     }
                 }
             } else {
+
+
                 System.out.println("ERROR: " + respuesta.getMensaje() + "\n\n");
             }
 

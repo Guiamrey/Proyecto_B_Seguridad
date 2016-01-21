@@ -7,9 +7,7 @@ import java.security.cert.CertificateException;
 
 public class FirmaClienteVerificarServidor {
 
-   /* private static int longbloque;
-    private static byte bloque[] = new byte[1024];
-   */ private static byte[] firmacliente;
+    private static byte[] firmacliente;
     private static PrivateKey privateKey;
     private static PublicKey publicKey;
 
@@ -56,17 +54,13 @@ public class FirmaClienteVerificarServidor {
         } catch (IOException e) {
             System.out.println("ERROR: " + e.getMessage());
             //  e.printStackTrace();
-        } catch (CertificateException e) {
-            e.printStackTrace();
-        } catch (UnrecoverableEntryException e) {
-            e.printStackTrace();
-        } catch (KeyStoreException e) {
+        } catch (CertificateException | KeyStoreException | UnrecoverableEntryException e) {
             e.printStackTrace();
         }
 
     }
 
-   public byte[] getFirma() {
+    public byte[] getFirma() {
         return firmacliente;
     }
 
@@ -105,15 +99,10 @@ public class FirmaClienteVerificarServidor {
     private static PrivateKey ClavePrivada() throws KeyStoreException, IOException, UnrecoverableEntryException, NoSuchAlgorithmException, CertificateException {
 
         KeyStore keyStore;
-       /* char[] passwordKeystore = "cliente".toCharArray();
+        char[] passwordKeystore = "cliente".toCharArray();
         char[] passwordPrivateKey = "cliente".toCharArray();
         String pathkeystore = "keystores/clientekeystore.jce";
-        String SKCliente = "cliente";*/
-        char[] passwordKeystore = "cambiala".toCharArray();
-        char[] passwordPrivateKey = "cambiala".toCharArray();
-        String pathkeystore = "JCKES/keystore_cliente2014.jce";
-        String SKCliente = "cliente_dsa";
-       // String SKCliente = "firmadoc";
+        String SKCliente = "cliente";
 
         keyStore = KeyStore.getInstance("JCEKS");
         keyStore.load(new FileInputStream(pathkeystore), passwordKeystore);
@@ -125,15 +114,9 @@ public class FirmaClienteVerificarServidor {
 
     private static void ClavePublica() throws Exception {
         KeyStore keyStore;
-        /*char[] passwordKeystore = "servidor".toCharArray();
-        String pathkeystore = "keystores/servidorkeystore.jce";
-        String SKServidor = "servidorrsa";*/
-        char[] passwordKeystore = "cambiala".toCharArray();
-        String pathkeystore = "JCKES/keystore_servidor2014.jce";
-        String SKServidor = "servidor_dsa";
-      /*  char[] passwordKeystore = "cliente".toCharArray();
-        String pathkeystore = "cliente_cacerts.jce";
-        String SKServidor = "servidor";*/
+        char[] passwordKeystore = "cliente".toCharArray();
+        String pathkeystore = "keystores/clientetruststore.jce";
+        String SKServidor = "autenservdsa";
 
         keyStore = KeyStore.getInstance("JCEKS");
         keyStore.load(new FileInputStream(pathkeystore), passwordKeystore);

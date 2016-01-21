@@ -3,12 +3,12 @@ import java.io.Serializable;
 public class RespuestaRegistro implements Serializable{
 
     private long idRegistro;
-    private String mensaje;
+    private int mensaje;
     byte[] firmaServidor;
     private String selloTemporal;
     private boolean correcto;
 
-    public RespuestaRegistro(long idRegistro, String mensaje, byte[] firmaServidor, String selloTemporal, boolean correcto){
+    public RespuestaRegistro(long idRegistro, int mensaje, byte[] firmaServidor, String selloTemporal, boolean correcto){
         this.idRegistro = idRegistro;
         this.selloTemporal = selloTemporal;
         this.mensaje = mensaje;
@@ -20,7 +20,7 @@ public class RespuestaRegistro implements Serializable{
         return idRegistro;
     }
 
-    public String getMensaje() {
+    public int getMensaje() {
         return mensaje;
     }
 

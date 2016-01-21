@@ -13,21 +13,15 @@ import java.util.Scanner;
 
 public class Servidor {
 
-   /* static String pathkeystore = "keystores/servidorkeystore.jce";
-    static String pathtruststore = "keystores/servidortruststore.jce";*/
-   static String pathkeystore = "KEYS/SERVIDOR/ksServidor.jce";
-    static String pathtruststore = "KEYS/SERVIDOR/tsServidor.jce";
-/*    static String pathkeystore = "servidor.jce";
-    static String pathtruststore = "servidor_cacerts.jce";*/
+    static String pathkeystore = "keystores/servidorkeystore.jce";
+    static String pathtruststore = "keystores/servidortruststore.jce";
 
     public static void main(String[] args){
 
         int puerto = 9050;
         definirKeystore();
-        //ServerSocket serverSocket = null;
         SSLServerSocketFactory serverSocketFactory = (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
        try {
-
 
             //TLS
             /***********************/
@@ -43,13 +37,11 @@ public class Servidor {
                 }
             } catch (IOException e) {
                 System.out.println("*** ERROR ***  El servidor ha caído --> " + e.getMessage());
-               // e.printStackTrace();
                 return;
             }
 
         } catch (IOException e) {
             System.out.println("\n ********* Error al introducir las contraseñas");
-            //e.printStackTrace();
         }
 
 

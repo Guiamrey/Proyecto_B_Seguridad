@@ -42,13 +42,7 @@ public class FirmarServidorValidarCliente {
             mensaje.close();
 
 
-        } catch (InvalidKeyException e) {
-            e.printStackTrace();
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (SignatureException e) {
+        } catch (InvalidKeyException | SignatureException | IOException | NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
 
@@ -80,20 +74,20 @@ public class FirmarServidorValidarCliente {
             System.out.println("Cifrando documento...");
             Cipher cifrador = Cipher.getInstance(algoritmo + transformacion);
             cifrador.init(Cipher.ENCRYPT_MODE, secretKey);
-            ByteArrayInputStream textoclaro = new ByteArrayInputStream(doc);
-            ByteArrayOutputStream textocifrado = new ByteArrayOutputStream();
+            ByteArrayInputStream docSinCifrar = new ByteArrayInputStream(doc);
+            ByteArrayOutputStream yaCifrado = new ByteArrayOutputStream();
 
-            while ((longbloque = textoclaro.read(enClaro)) > 0) {
+            while ((longbloque = docSinCifrar.read(enClaro)) > 0) {
                 cifrado = cifrador.update(enClaro, 0, longbloque);
-                textocifrado.write(cifrado);
+                yaCifrado.write(cifrado);
             }
             cifrado = cifrador.doFinal();
-            textocifrado.write(cifrado);
+            yaCifrado.write(cifrado);
             System.out.println("Documento cifrado> " + algoritmo + "-" + tamañoClave + " Proveedor: " + provider);
-            textocifrado.close();
-            textoclaro.close();
+            yaCifrado.close();
+            docSinCifrar.close();
 
-        byte[] docCifrado = textocifrado.toByteArray();
+        byte[] docCifrado = yaCifrado.toByteArray();
         encoding = cifrador.getParameters().getEncoded();
         return docCifrado;
     }
@@ -180,15 +174,9 @@ public class FirmarServidorValidarCliente {
     private static void ClavePublica() {
 
         KeyStore keyStore;
-        /*char[] passwordKeystore = "cliente".toCharArray();
-        String pathkeystore = "keystores/clientekeystore.jce";
-        String SKCliente = "cliente";*/
-        char[] passwordKeystore = "cambiala".toCharArray();
-        String pathkeystore = "JCKES/keystore_cliente2014.jce";
-        String SKCliente = "cliente_dsa";
-      /*  char[] passwordKeystore = "cliente".toCharArray(); //anton
-        String pathkeystore = "servidor_cacerts.jce";
-        String SKCliente = "firmadoc";*/
+        char[] passwordKeystore = "servidor".toCharArray();
+        String pathkeystore = "keystores/servidortruststore.jce";
+        String SKCliente = "autencliente";
         PublicKey publickey = null;
         try {
             keyStore = KeyStore.getInstance("JCEKS");
@@ -202,18 +190,10 @@ public class FirmarServidorValidarCliente {
 
     private PrivateKey ClavePrivada() {
         KeyStore keyStore;
-        /*char[] passwordKeystore = "servidor".toCharArray();
+        char[] passwordKeystore = "servidor".toCharArray();
         char[] passwordPrivateKey = "servidor".toCharArray();
         String pathkeystore = "keystores/servidorkeystore.jce";
-        String SKServidor = "servidordsa";*/
-        char[] passwordKeystore = "cambiala".toCharArray();
-        char[] passwordPrivateKey = "cambiala".toCharArray();
-        String pathkeystore = "JCKES/keystore_servidor2014.jce";
-        String SKServidor = "servidor_dsa";
-       /* char[] passwordKeystore = "cliente".toCharArray(); //anton
-        char[] passwordPrivateKey = "cliente".toCharArray();
-        String pathkeystore = "servidor.jce";
-        String SKServidor = "servidor";*/
+        String SKServidor = "servidordsa";
         PrivateKey privateKey = null;
 
         try {
