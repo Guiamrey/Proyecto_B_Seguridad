@@ -8,18 +8,15 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.*;
 import java.security.cert.CertificateException;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Scanner;
+import java.util.*;
 
 public class ServerConnection extends Thread {
 
     private Socket cliente;
     String algCifrado;
     private FirmarServidorValidarCliente firmarSVerificarC = new FirmarServidorValidarCliente();
-    private LinkedList<Integer> IdsRegistros = new LinkedList<>();
-    private LinkedList<BaseDeDatos> BaseDatos = new LinkedList<>();
+    private ArrayList<Integer> IdsRegistros = new ArrayList<>();
+    private ArrayList<BaseDeDatos> BaseDatos = new ArrayList<>();
     private static ObjectInputStream receivedObject;
     private static ObjectOutputStream sendObject;
 
@@ -32,7 +29,7 @@ public class ServerConnection extends Thread {
     public void run() {
 
         try {
-            System.out.println("***** Connection established ******\n");
+            System.out.println("***************************** Connection established ********************************\n");
             BufferedReader receivedData = new BufferedReader(new InputStreamReader(cliente.getInputStream()));
             sendObject = new ObjectOutputStream(cliente.getOutputStream());
             receivedObject = new ObjectInputStream(cliente.getInputStream());
@@ -57,14 +54,12 @@ public class ServerConnection extends Thread {
                 }
             }
         } catch (IOException e) {
-            System.out.println("**** El cliente se ha desconectado ****\nError: " + e.getMessage());
+            System.out.println("\n************************** El cliente se ha desconectado ****************************\nError: " + e.getMessage());
         }
     }
 
     private void registrarDocumento() {
-
         int idRegistro = idRegistro();
-
         try {
             PeticionRegistro peticion = (PeticionRegistro) receivedObject.readObject();
             String idpropietario = peticion.getIdPropietario();
@@ -109,14 +104,14 @@ public class ServerConnection extends Thread {
                     BaseDeDatos nuevoregistro = new BaseDeDatos(idRegistro, nombreDoc, idpropietario, selloTemporal, true);
                     BaseDatos.add(nuevoregistro);
                     guardado = new File(nombre);
-                    System.out.println("Documento guardado\n");
+                    System.out.println("Documento guardado correctamente\nEnviando respuesta...\n");
                 } else {
                     String nombre = String.valueOf(idRegistro) + "_" + idpropietario + ".sig";
                     archivo = new Archivo(idRegistro, nombreDoc, extension, idpropietario, selloTemporal, false, peticion.getDocumento(), peticion.getFirmaDoc(), firmaServidor, null);
                     BaseDeDatos nuevoregistro = new BaseDeDatos(idRegistro, nombreDoc, idpropietario, selloTemporal, false);
                     BaseDatos.add(nuevoregistro);
                     guardado = new File(nombre);
-                    System.out.println("Documento guardado\n");
+                    System.out.println("Documento guardado correctamente\nEnviando respuesta...");
                 }
 
                 ObjectOutputStream escribir = new ObjectOutputStream(new FileOutputStream(guardado));
@@ -178,7 +173,7 @@ public class ServerConnection extends Thread {
                         ObjectInputStream leerObjeto = new ObjectInputStream(new FileInputStream(ruta));
                         Archivo provisional = (Archivo) leerObjeto.readObject();
                         leerObjeto.close();
-                        byte[] docDescifrado = firmarSVerificarC.descifrarDoc(provisional.getDoc(), provisional.getEncoding());
+                        byte[] docDescifrado = firmarSVerificarC.descifrarDoc(provisional.getDoc(), provisional.getEncoding(), algCifrado);
                         RespuestaRecuperar respuesta = new RespuestaRecuperar(idRegistro, 0, provisional.getExtension(), docDescifrado, provisional.getFirmaServidor(), provisional.getFirmaCliente(), provisional.getSelloTemporal(), true);
                         sendObject.writeObject(respuesta);
                         System.out.println("Documento recuperado correctamente\nEnviando respuesta...\n");
@@ -240,6 +235,7 @@ public class ServerConnection extends Thread {
             }
             RespuestaListar respuesta = new RespuestaListar(ListaPublicos, ListaPrivados);
             sendObject.writeObject(respuesta);
+            System.out.println("\nEnviando respuesta...\n");
 
         } catch (ClassNotFoundException | IOException e) {
             e.printStackTrace();

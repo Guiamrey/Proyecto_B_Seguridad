@@ -86,27 +86,30 @@ public class FirmarServidorValidarCliente {
     public byte[] cifrarDoc(byte[] doc, String algCifrado) throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException, UnrecoverableEntryException, InvalidKeyException, NoSuchPaddingException, BadPaddingException, IllegalBlockSizeException {
 
         KeyStore keyStores;
-        char[] contraseña = "cliente".toCharArray();
-        char[] contraseñaKey = "cliente".toCharArray();
+        /*char[] contraseña = "cliente".toCharArray();
+        char[] contraseñaKey = "cliente".toCharArray();*/
+        char[] contraseña = "servidor".toCharArray();
+        char[] contraseñaKey = "servidor".toCharArray();
+        String algoritmo;
 
         keyStores = KeyStore.getInstance("JCEKS");
-        keyStores.load(new FileInputStream("servidor.jce"), contraseñaKey);
-        KeyStore.SecretKeyEntry ksEntry = (KeyStore.SecretKeyEntry) keyStores.getEntry("ksservidor", new KeyStore.PasswordProtection(contraseña));
+        keyStores.load(new FileInputStream("keystores/servidorkeystore.jce"), contraseñaKey);
+       // keyStores.load(new FileInputStream("servidor.jce"), contraseñaKey);
+        KeyStore.SecretKeyEntry ksEntry;
+        if(algCifrado.equalsIgnoreCase("AES-128")){
+            ksEntry = (KeyStore.SecretKeyEntry) keyStores.getEntry("seckeyaes-128", new KeyStore.PasswordProtection(contraseña));
+            algoritmo = "AES/CBC/PKCS5Padding";
+        }else{
+            ksEntry = (KeyStore.SecretKeyEntry) keyStores.getEntry("seckeyarcfour", new KeyStore.PasswordProtection(contraseña));
+            algoritmo = "ARCFOUR";
+        }
+       // KeyStore.SecretKeyEntry ksEntry = (KeyStore.SecretKeyEntry) keyStores.getEntry("ksservidor", new KeyStore.PasswordProtection(contraseña));
         SecretKey secretKey = ksEntry.getSecretKey();
 
         String provider = "SunJCE";
         byte bloqueclaro[] = new byte[2024];
         byte bloquecifrado[];
-        String algoritmo;
-
-        int tamañoClave = 128;
         int longbloque;
-
-        if(algCifrado.equalsIgnoreCase("AES-128")){
-            algoritmo = "AES/CBC/PKCS5Padding";
-        }else {
-            algoritmo = "ARCFOUR";
-        }
 
         ByteArrayInputStream docSinCifrar = new ByteArrayInputStream(doc);
         ByteArrayOutputStream yaCifrado = new ByteArrayOutputStream();
@@ -121,12 +124,15 @@ public class FirmarServidorValidarCliente {
         }
         bloquecifrado = cifrador.doFinal();
         yaCifrado.write(bloquecifrado);
-        System.out.println("Documento cifrado> " + algoritmo + "-" + tamañoClave + " Proveedor: " + provider);
+        System.out.println("Documento cifrado-> " + algCifrado + " Proveedor: " + provider);
         yaCifrado.close();
         docSinCifrar.close();
+        if(algCifrado.equals("AES-128")){
 
+            encoding = cifrador.getParameters().getEncoded();
+
+        }
         byte[] docCifrado = yaCifrado.toByteArray();
-        encoding = cifrador.getParameters().getEncoded();
         return docCifrado;
     }
 
@@ -134,48 +140,62 @@ public class FirmarServidorValidarCliente {
         return encoding;
     }
 
-    public byte[] descifrarDoc(byte[] docCifrado, byte[] encoding) throws Exception {
+    public byte[] descifrarDoc(byte[] docCifrado, byte[] encoding, String algCifrado) throws Exception {
 
         System.out.println("Descifrando documento...");
 
         KeyStore keyStore;
-        char[] contraseña = "cliente".toCharArray();
-        char[] contraseñaKey = "cliente".toCharArray();
+        /*char[] contraseña = "cliente".toCharArray();
+        char[] contraseñaKey = "cliente".toCharArray();*/
+        char[] contraseña = "servidor".toCharArray();
+        char[] contraseñaKey = "servidor".toCharArray();
+        String algoritmo;
+        String transformacion = "";
 
         keyStore = KeyStore.getInstance("JCEKS");
-        keyStore.load(new FileInputStream("servidor.jce"), contraseñaKey);
-        KeyStore.SecretKeyEntry ksEntry = (KeyStore.SecretKeyEntry) keyStore.getEntry("ksservidor", new KeyStore.PasswordProtection(contraseña));
+        keyStore.load(new FileInputStream("keystores/servidorkeystore.jce"), contraseñaKey);
+        //keyStore.load(new FileInputStream("servidor.jce"), contraseñaKey);
+        KeyStore.SecretKeyEntry ksEntry;
+        if(algCifrado.equalsIgnoreCase("AES-128")){
+            ksEntry = (KeyStore.SecretKeyEntry) keyStore.getEntry("seckeyaes-128", new KeyStore.PasswordProtection(contraseña));
+            algoritmo = "AES";
+            transformacion = "/CBC/PKCS5Padding";
+        }else{
+            ksEntry = (KeyStore.SecretKeyEntry) keyStore.getEntry("seckeyarcfour", new KeyStore.PasswordProtection(contraseña));
+            algoritmo = "ARCFOUR";
+        }
+       // KeyStore.SecretKeyEntry ksEntry = (KeyStore.SecretKeyEntry) keyStore.getEntry("ksservidor", new KeyStore.PasswordProtection(contraseña));
         SecretKey key = ksEntry.getSecretKey();
 
         String provider = "SunJCE";
         byte bloqueclaro[];
         byte bloquecifrado[] = new byte[1024];
-        String algoritmo = "AES";
-        String transformacion = "/CBC/PKCS5Padding";
         int longbloque;
-        AlgorithmParameters params = AlgorithmParameters.getInstance(algoritmo, provider);
-        params.init(encoding);
+
+        Cipher descifrador = Cipher.getInstance(algoritmo + transformacion, provider);
+        if(algCifrado.equals("AES-128")) {
+            AlgorithmParameters params = AlgorithmParameters.getInstance(algoritmo, provider);
+            params.init(encoding);
+            descifrador.init(Cipher.DECRYPT_MODE, key, params);
+        }else{
+            descifrador.init(Cipher.DECRYPT_MODE, key);
+        }
 
         ByteArrayInputStream textocifrado = new ByteArrayInputStream(docCifrado);
         ByteArrayOutputStream textoclaro = new ByteArrayOutputStream();
 
-        Cipher descifrador = Cipher.getInstance(algoritmo + transformacion, provider);
-        descifrador.init(Cipher.DECRYPT_MODE, key, params);
 
         while ((longbloque = textocifrado.read(bloquecifrado)) > 0) {
             bloqueclaro = descifrador.update(bloquecifrado, 0, longbloque);
             textoclaro.write(bloqueclaro);
         }
-
         bloqueclaro = descifrador.doFinal();
-
         System.out.println("Documento descifrado.");
         textoclaro.write(bloqueclaro);
         textocifrado.close();
         textoclaro.close();
-        byte[] docRec = textoclaro.toByteArray();
-        return docRec;
 
+        return textoclaro.toByteArray();
     }
 
     private static void ClavePublica() {
@@ -183,7 +203,8 @@ public class FirmarServidorValidarCliente {
         KeyStore keyStore;
         char[] passwordKeystore = "servidor".toCharArray();
         String pathkeystore = "keystores/servidortruststore.jce";
-        String SKCliente = "autencliente";
+        //String SKCliente = "autenclient_rsa";
+        String SKCliente = "autenclient_dsa";
         PublicKey publickey = null;
         try {
             keyStore = KeyStore.getInstance("JCEKS");
@@ -200,7 +221,8 @@ public class FirmarServidorValidarCliente {
         char[] passwordKeystore = "servidor".toCharArray();
         char[] passwordPrivateKey = "servidor".toCharArray();
         String pathkeystore = "keystores/servidorkeystore.jce";
-        String SKServidor = "servidordsa";
+        //String SKServidor = "servidor_rsa";
+        String SKServidor = "servidor_dsa";
         PrivateKey privateKey = null;
 
         try {

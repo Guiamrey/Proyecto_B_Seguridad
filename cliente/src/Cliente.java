@@ -27,17 +27,32 @@ public class Cliente {
         try {
 
             SSLSocketFactory socketFactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
+            String[] cadena = new String[1];
+            boolean suiteAceptada = false;
+
             /**************  Suites SSL  Disponibles *******************/
-            /* String[] suites = socketFactory.getSupportedCipherSuites();
+            /*String[] suites = socketFactory.getSupportedCipherSuites();
             System.out.println("******** CypherSuites Disponibles **********");
             for (int i = 0; i < suites.length; i++) {
-                System.out.println(i+1+".- "+suites[i]);
+                System.out.println(i + 1 + ".- " + suites[i]);
             }
-            String suiteSSL;
-            Scanner consola = new Scanner(System.in);
-            String cadena = consola.nextLine();*/
+            do {
+                System.out.println("\nIntroduzca una de las suites disponibles a usar en la comunicación:\n");
+                Scanner consola = new Scanner(System.in);
+                cadena[0] = consola.nextLine();
+                //String cadena = consola.nextLine();
+                for (int i = 0; i < suites.length; i++) {
+                    if (suites[i].equals(cadena[0])) {
+                        suiteAceptada = true;
+                    }
+                }
+                if (!suiteAceptada) {
+                    System.out.println("La Cipher Suite SLL que ha introducido no está disponible. Introduzca una de las listadas.");
+                }
+            } while (!suiteAceptada);*/
             /***************************************************/
             SSLSocket SSLsocket = (SSLSocket) socketFactory.createSocket(host, puerto);
+        //    SSLsocket.setEnabledCipherSuites(cadena);
             SSLsocket.startHandshake();
             System.out.println("**** Conexion con el servidor correctamente establecida **** \n");
 
@@ -213,7 +228,6 @@ public class Cliente {
 
                 byte[] sigServ = escribirfirma.toByteArray();
                 escribirfirma.close();
-                // boolean valida = true;
                 boolean valida = firmarcliente.verificarServidor(sigServ, respuesta.getFirmaServidor());
                 if (valida) {
                     /*******Firma servidor validada****/
@@ -232,7 +246,7 @@ public class Cliente {
                         System.out.println("Sello temporal: " + respuesta.getSelloTemporal());
                         System.out.println("Firma del servidor: " + respuesta.getFirmaServidor().toString());
                     } else {
-                       System.out.println("Documento alterado por el registrador");
+                        System.out.println("Documento alterado por el registrador");
                     }
                     //Ya se imprime el error en la funcion de validar
                 }
@@ -317,7 +331,6 @@ public class Cliente {
                     System.out.println("- " + doc);
                 }
             }
-
             System.out.println("\n***Documentos privados:");
             if (ListaPrivados.isEmpty()) {
                 System.out.println("No hay documentos privados del propietario:" + idPropietario);
@@ -326,16 +339,14 @@ public class Cliente {
                     System.out.println("- " + doc);
                 }
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
+        } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
 
     }
 
     public static void definirKeystores() {
-        System.out.println("Valores de las contraseñas de los stores (Cliente): \n(keyStoreFile) contraseñaKeystore (trustStoreFile) contraseñaTruststore)\n");
+        System.out.println("Valores de las contraseñas de los stores (Cliente): \n(keyStoreFile) contraseñaKeystore (trustStoreFile) contraseñaTruststore\n");
         Scanner consola = new Scanner(System.in);
         String cadena = consola.nextLine();
         String[] aux = cadena.split(" ");

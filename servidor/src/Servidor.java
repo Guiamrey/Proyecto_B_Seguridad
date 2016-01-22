@@ -31,7 +31,7 @@ public class Servidor {
                 while (true) {
                     Socket cliente = serverSocket.accept();
                     ServerConnection serverConnection = new ServerConnection(cliente, algCifrado);
-                    serverConnection.run();
+                    serverConnection.start();
                 }
             } catch (IOException e) {
                 System.out.println("*** ERROR ***  El servidor ha caído --> " + e.getMessage());
@@ -48,8 +48,8 @@ public class Servidor {
         Scanner consola = new Scanner(System.in);
         String cadena = consola.nextLine();
         String[] aux = cadena.split(" ");
-        //String keystrore = aux[0];
-        //String truststore = aux[2];
+        //String keystrore = "keystores/" + aux[0];
+        //String truststore = "keystores/" + aux[2];
         String passwKS = aux[0];
         String passwTS = aux[1];
         String pathkeystore = "keystores/servidorkeystore.jce";

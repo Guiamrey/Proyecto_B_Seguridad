@@ -102,7 +102,8 @@ public class FirmaClienteVerificarServidor {
         char[] passwordKeystore = "cliente".toCharArray();
         char[] passwordPrivateKey = "cliente".toCharArray();
         String pathkeystore = "keystores/clientekeystore.jce";
-        String SKCliente = "cliente";
+       // String SKCliente = "client_rsa";
+        String SKCliente = "client_dsa";
 
         keyStore = KeyStore.getInstance("JCEKS");
         keyStore.load(new FileInputStream(pathkeystore), passwordKeystore);
@@ -116,7 +117,8 @@ public class FirmaClienteVerificarServidor {
         KeyStore keyStore;
         char[] passwordKeystore = "cliente".toCharArray();
         String pathkeystore = "keystores/clientetruststore.jce";
-        String SKServidor = "autenservdsa";
+        //String SKServidor = "autenserv_rsa";
+        String SKServidor = "autenserv_dsa";
 
         keyStore = KeyStore.getInstance("JCEKS");
         keyStore.load(new FileInputStream(pathkeystore), passwordKeystore);
