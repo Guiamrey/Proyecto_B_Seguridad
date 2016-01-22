@@ -31,7 +31,7 @@ public class Cliente {
             boolean suiteAceptada = false;
 
             /**************  Suites SSL  Disponibles *******************/
-            /*String[] suites = socketFactory.getSupportedCipherSuites();
+            String[] suites = socketFactory.getSupportedCipherSuites();
             System.out.println("******** CypherSuites Disponibles **********");
             for (int i = 0; i < suites.length; i++) {
                 System.out.println(i + 1 + ".- " + suites[i]);
@@ -49,7 +49,7 @@ public class Cliente {
                 if (!suiteAceptada) {
                     System.out.println("La Cipher Suite SLL que ha introducido no está disponible. Introduzca una de las listadas.");
                 }
-            } while (!suiteAceptada);*/
+            } while (!suiteAceptada);
             /***************************************************/
             SSLSocket SSLsocket = (SSLSocket) socketFactory.createSocket(host, puerto);
         //    SSLsocket.setEnabledCipherSuites(cadena);
