@@ -154,7 +154,7 @@ public class ServerConnection extends Thread {
             System.out.println("Propietario-> " + idpropietario);
             int i = encontrarDoc(idpropietario, idRegistro);
             if (i >= 0) {
-                if(BaseDatos.get(i).isPrivado()){ //privado
+                if (BaseDatos.get(i).isPrivado()) { //privado
                     /*******Validar firma cliente****/
                     ByteArrayOutputStream escribirfirma = new ByteArrayOutputStream();
                     DataOutputStream escribir = new DataOutputStream(escribirfirma);

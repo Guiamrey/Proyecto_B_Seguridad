@@ -52,7 +52,7 @@ public class Cliente {
             } while (!suiteAceptada);
             /***************************************************/
             SSLSocket SSLsocket = (SSLSocket) socketFactory.createSocket(host, puerto);
-        //    SSLsocket.setEnabledCipherSuites(cadena);
+            //    SSLsocket.setEnabledCipherSuites(cadena);
             SSLsocket.startHandshake();
             System.out.println("**** Conexion con el servidor correctamente establecida **** \n");
 

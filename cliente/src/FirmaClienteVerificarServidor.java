@@ -102,7 +102,7 @@ public class FirmaClienteVerificarServidor {
         char[] passwordKeystore = "cliente".toCharArray();
         char[] passwordPrivateKey = "cliente".toCharArray();
         String pathkeystore = "keystores/clientekeystore.jce";
-       // String SKCliente = "client_rsa";
+        // String SKCliente = "client_rsa";
         String SKCliente = "client_dsa";
 
         keyStore = KeyStore.getInstance("JCEKS");

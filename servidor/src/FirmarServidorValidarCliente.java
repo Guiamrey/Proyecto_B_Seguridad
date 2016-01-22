@@ -86,24 +86,20 @@ public class FirmarServidorValidarCliente {
     public byte[] cifrarDoc(byte[] doc, String algCifrado) throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException, UnrecoverableEntryException, InvalidKeyException, NoSuchPaddingException, BadPaddingException, IllegalBlockSizeException {
 
         KeyStore keyStores;
-        /*char[] contraseña = "cliente".toCharArray();
-        char[] contraseñaKey = "cliente".toCharArray();*/
         char[] contraseña = "servidor".toCharArray();
         char[] contraseñaKey = "servidor".toCharArray();
         String algoritmo;
 
         keyStores = KeyStore.getInstance("JCEKS");
         keyStores.load(new FileInputStream("keystores/servidorkeystore.jce"), contraseñaKey);
-       // keyStores.load(new FileInputStream("servidor.jce"), contraseñaKey);
         KeyStore.SecretKeyEntry ksEntry;
-        if(algCifrado.equalsIgnoreCase("AES-128")){
+        if (algCifrado.equalsIgnoreCase("AES-128")) {
             ksEntry = (KeyStore.SecretKeyEntry) keyStores.getEntry("seckeyaes-128", new KeyStore.PasswordProtection(contraseña));
             algoritmo = "AES/CBC/PKCS5Padding";
-        }else{
+        } else {
             ksEntry = (KeyStore.SecretKeyEntry) keyStores.getEntry("seckeyarcfour", new KeyStore.PasswordProtection(contraseña));
             algoritmo = "ARCFOUR";
         }
-       // KeyStore.SecretKeyEntry ksEntry = (KeyStore.SecretKeyEntry) keyStores.getEntry("ksservidor", new KeyStore.PasswordProtection(contraseña));
         SecretKey secretKey = ksEntry.getSecretKey();
 
         String provider = "SunJCE";
@@ -127,7 +123,7 @@ public class FirmarServidorValidarCliente {
         System.out.println("Documento cifrado-> " + algCifrado + " Proveedor: " + provider);
         yaCifrado.close();
         docSinCifrar.close();
-        if(algCifrado.equals("AES-128")){
+        if (algCifrado.equals("AES-128")) {
 
             encoding = cifrador.getParameters().getEncoded();
 
@@ -145,8 +141,6 @@ public class FirmarServidorValidarCliente {
         System.out.println("Descifrando documento...");
 
         KeyStore keyStore;
-        /*char[] contraseña = "cliente".toCharArray();
-        char[] contraseñaKey = "cliente".toCharArray();*/
         char[] contraseña = "servidor".toCharArray();
         char[] contraseñaKey = "servidor".toCharArray();
         String algoritmo;
@@ -154,17 +148,15 @@ public class FirmarServidorValidarCliente {
 
         keyStore = KeyStore.getInstance("JCEKS");
         keyStore.load(new FileInputStream("keystores/servidorkeystore.jce"), contraseñaKey);
-        //keyStore.load(new FileInputStream("servidor.jce"), contraseñaKey);
         KeyStore.SecretKeyEntry ksEntry;
-        if(algCifrado.equalsIgnoreCase("AES-128")){
+        if (algCifrado.equalsIgnoreCase("AES-128")) {
             ksEntry = (KeyStore.SecretKeyEntry) keyStore.getEntry("seckeyaes-128", new KeyStore.PasswordProtection(contraseña));
             algoritmo = "AES";
             transformacion = "/CBC/PKCS5Padding";
-        }else{
+        } else {
             ksEntry = (KeyStore.SecretKeyEntry) keyStore.getEntry("seckeyarcfour", new KeyStore.PasswordProtection(contraseña));
             algoritmo = "ARCFOUR";
         }
-       // KeyStore.SecretKeyEntry ksEntry = (KeyStore.SecretKeyEntry) keyStore.getEntry("ksservidor", new KeyStore.PasswordProtection(contraseña));
         SecretKey key = ksEntry.getSecretKey();
 
         String provider = "SunJCE";
@@ -173,11 +165,11 @@ public class FirmarServidorValidarCliente {
         int longbloque;
 
         Cipher descifrador = Cipher.getInstance(algoritmo + transformacion, provider);
-        if(algCifrado.equals("AES-128")) {
+        if (algCifrado.equals("AES-128")) {
             AlgorithmParameters params = AlgorithmParameters.getInstance(algoritmo, provider);
             params.init(encoding);
             descifrador.init(Cipher.DECRYPT_MODE, key, params);
-        }else{
+        } else {
             descifrador.init(Cipher.DECRYPT_MODE, key);
         }
 
