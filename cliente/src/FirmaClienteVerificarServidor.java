@@ -10,6 +10,7 @@ public class FirmaClienteVerificarServidor {
     private static byte[] firmacliente;
     private static PrivateKey privateKey;
     private static PublicKey publicKey;
+    private static PublicKey publicKeyTSA;
 
     public FirmaClienteVerificarServidor() {
     }
@@ -124,5 +125,47 @@ public class FirmaClienteVerificarServidor {
         keyStore.load(new FileInputStream(pathkeystore), passwordKeystore);
 
         publicKey = keyStore.getCertificate(SKServidor).getPublicKey();
+    }
+
+    private static void ClavePublicaTSA() {
+
+        KeyStore keyStore;
+        char[] passwordKeystore = "servidor".toCharArray();
+        String pathkeystore = "keystores/servidortruststore.jce";
+        String SKCliente = "autentsa_dsa";
+        PublicKey publickey = null;
+        try {
+            keyStore = KeyStore.getInstance("JCEKS");
+            keyStore.load(new FileInputStream(pathkeystore), passwordKeystore);
+            publickey = keyStore.getCertificate(SKCliente).getPublicKey();
+        } catch (CertificateException | IOException | NoSuchAlgorithmException | KeyStoreException e) {
+            e.printStackTrace();
+        }
+        publicKeyTSA = publickey;
+    }
+    public boolean verificarFirmaTSA(byte[] sigTSA, byte[] firmacliente) throws IOException, InvalidKeyException, NoSuchAlgorithmException, SignatureException {
+        String algoritmo = "SHA1withDSA";;
+        int longbloque;
+        byte bloque[] = new byte[1024];
+
+        System.out.println("Inicio de la verificación del TSA...");
+        ByteArrayInputStream validar = new ByteArrayInputStream(sigTSA);
+        ClavePublicaTSA();
+        //Creacion del objeto para firmar y inicializacion del objeto
+        Signature verifier = Signature.getInstance(algoritmo);
+        verifier.initVerify(publicKeyTSA);
+        while ((longbloque = validar.read(bloque)) > 0) {
+            verifier.update(bloque, 0, longbloque);
+        }
+        validar.close();
+
+        if (verifier.verify(firmacliente)) {
+            System.out.println("Firma del TSA correcta\n");
+            return true;
+        } else {
+            System.out.println("Firma del TSA no valida\n");
+            return false;
+        }
+
     }
 }

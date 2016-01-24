@@ -10,8 +10,9 @@ public class RespuestaRecuperar implements Serializable {
     private String selloTemporal;
     private boolean correcto;
     private byte[] firmaCliente;
+    private byte[] firmaTSA;
 
-    public RespuestaRecuperar(long idRegistro, int mensaje, String extension, byte[] doc, byte[] firmaServidor, byte[] firmaCliente, String selloTemporal, boolean correcto){
+    public RespuestaRecuperar(long idRegistro, int mensaje, String extension, byte[] doc, byte[] firmaServidor, byte[] firmaCliente, byte[] firmaTSA, String selloTemporal, boolean correcto){
         this.idRegistro = idRegistro;
         this.selloTemporal = selloTemporal;
         this.doc = doc;
@@ -20,6 +21,12 @@ public class RespuestaRecuperar implements Serializable {
         this.firmaCliente = firmaCliente;
         this.firmaServidor = firmaServidor;
         this.correcto = correcto;
+        this.firmaTSA = firmaTSA;
+
+    }
+
+    public byte[] getFirmaTSA() {
+        return firmaTSA;
     }
 
     public String getExtension() {

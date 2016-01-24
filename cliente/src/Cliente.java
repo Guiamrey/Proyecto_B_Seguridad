@@ -31,7 +31,7 @@ public class Cliente {
             boolean suiteAceptada = false;
 
             /**************  Suites SSL  Disponibles *******************/
-            String[] suites = socketFactory.getSupportedCipherSuites();
+           /* String[] suites = socketFactory.getSupportedCipherSuites();
             System.out.println("******** CypherSuites Disponibles **********");
             for (int i = 0; i < suites.length; i++) {
                 System.out.println(i + 1 + ".- " + suites[i]);
@@ -49,7 +49,7 @@ public class Cliente {
                 if (!suiteAceptada) {
                     System.out.println("La Cipher Suite SLL que ha introducido no está disponible. Introduzca una de las listadas.");
                 }
-            } while (!suiteAceptada);
+            } while (!suiteAceptada);*/
             /***************************************************/
             SSLSocket SSLsocket = (SSLSocket) socketFactory.createSocket(host, puerto);
             //    SSLsocket.setEnabledCipherSuites(cadena);
@@ -127,7 +127,7 @@ public class Cliente {
 
     private static void registrarDocumento(String[] orden) {
 
-        if (orden.length < 4) {
+        if (orden.length != 4) {
             System.out.println("Error de sintaxis. Faltan parametros.\n REGISTRAR_DOCUMENTO idPropietario nombreDocumento tipoConfidencialidad");
             return;
         }
@@ -135,6 +135,10 @@ public class Cliente {
         String nombreDoc = orden[2];
         String tipoConfidencialidad = orden[3];
         sendData.println("1");
+        System.out.println("IdPropietario: "+idpropietario);
+        System.out.println("Documento: "+nombreDoc);
+        System.out.println("Confidencialidad: "+tipoConfidencialidad);
+
         try {
             System.out.println("Leyendo el documento: " + nombreDoc);
             File doc = new File(nombreDoc);
@@ -175,6 +179,9 @@ public class Cliente {
                     case 1:
                         mensaje = "Verificación de la firma del documento del cliente en el servidor no valida";
                         break;
+                    case 2:
+                        mensaje = "Fallo de firma de TimeStamp";
+                        break;
                     default:
                         mensaje = "Error desconocido";
                         break;
@@ -191,7 +198,7 @@ public class Cliente {
 
     private static void recuperarDocumento(String[] orden) {
 
-        if (orden.length < 3) {
+        if (orden.length != 3){
             System.out.println("Error de sintaxis. Faltan parametros.\n RECUPERAR_DOCUMENTO idPropietario idRegistro");
             return;
         }
@@ -218,6 +225,14 @@ public class Cliente {
             RespuestaRecuperar respuesta = (RespuestaRecuperar) receivedObject.readObject();
             /******************Comprobar respuesta del servidor**********************/
             if (respuesta.isCorrecto()) {
+                /********************VALIDAR FIRMA TSA******************************/
+                ByteArrayOutputStream writefirma = new ByteArrayOutputStream();
+                DataOutputStream esc = new DataOutputStream(writefirma);
+                esc.write(SHA256(respuesta.getDoc()));
+                esc.writeUTF(respuesta.getSelloTemporal());
+                byte[] firmaTSA = writefirma.toByteArray();
+                writefirma.close();
+                boolean validoTSA = firmarcliente.verificarFirmaTSA(firmaTSA, respuesta.getFirmaTSA());
                 /*******Validar firma servidor****/
                 ByteArrayOutputStream escribirfirma = new ByteArrayOutputStream();
                 DataOutputStream escribir = new DataOutputStream(escribirfirma);
@@ -306,7 +321,7 @@ public class Cliente {
 
     private static void listarDocumentos(String[] orden) {
 
-        if (orden.length < 2) {
+        if (orden.length != 2) {
             System.out.println("Error de sintaxis. Faltan parametros.\n RECUPERAR_DOCUMENTO idPropietario idRegistro");
             return;
         }

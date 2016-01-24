@@ -70,6 +70,5 @@ public class Servidor {
         // Path al Trustore del cliente
         System.setProperty("javax.net.ssl.trustStore", pathtruststore);
 
-
     }
 }

@@ -1,9 +1,5 @@
-REGISTRAR_DOCUMENTO pires foto4.jpg privado
-REGISTRAR_DOCUMENTO rofdot foto5.jpg privado
-REGISTRAR_DOCUMENTO peddfdro foto4.jpg publico
-REGISTRAR_DOCUMENTO fds foto5.jpg publico
-REGISTRAR_DOCUMENTO pires foto3.jpg privado
-REGISTRAR_DOCUMENTO peddfdro foto4.jpg publico
-RECUPERAR_DOCUMENTO pires 1
-LISTAR_DOCUMENTOS pires
+REGISTRAR_DOCUMENTO ruth foto4.jpg privado
+REGISTRAR_DOCUMENTO marcos foto4.jpg publico
+RECUPERAR_DOCUMENTO ruth 3
+LISTAR_DOCUMENTOS ruth
 EXIT
