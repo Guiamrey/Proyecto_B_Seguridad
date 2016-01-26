@@ -21,7 +21,6 @@ public class Servidor {
         SSLServerSocketFactory serverSocketFactory = (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
         try {
 
-            //TLS
             /***********************/
             ServerSocket serverSocket = serverSocketFactory.createServerSocket(puerto);
             System.out.println("\n**** Servidor en funcionamiento ****\n");
@@ -48,13 +47,11 @@ public class Servidor {
         Scanner consola = new Scanner(System.in);
         String cadena = consola.nextLine();
         String[] aux = cadena.split(" ");
-        //String keystrore = "keystores/" + aux[0];
-        //String truststore = "keystores/" + aux[2];
-        String passwKS = aux[0];
-        String passwTS = aux[1];
-        String pathkeystore = "keystores/servidorkeystore.jce";
-        String pathtruststore = "keystores/servidortruststore.jce";
-        algCifrado = aux[2];
+        String passwKS = aux[1];
+        String passwTS = aux[3];
+        String pathkeystore =  "keystores/" + aux[0];
+        String pathtruststore = "keystores/" + aux[2];
+        algCifrado = aux[4];
 
         // Contraseña del keystore del cliente
         System.setProperty("javax.net.ssl.keyStorePassword", passwKS);

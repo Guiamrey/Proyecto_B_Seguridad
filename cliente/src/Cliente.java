@@ -31,7 +31,7 @@ public class Cliente {
             boolean suiteAceptada = false;
 
             /**************  Suites SSL  Disponibles *******************/
-           /* String[] suites = socketFactory.getSupportedCipherSuites();
+            String[] suites = socketFactory.getSupportedCipherSuites();
             System.out.println("******** CypherSuites Disponibles **********");
             for (int i = 0; i < suites.length; i++) {
                 System.out.println(i + 1 + ".- " + suites[i]);
@@ -40,7 +40,6 @@ public class Cliente {
                 System.out.println("\nIntroduzca una de las suites disponibles a usar en la comunicación:\n");
                 Scanner consola = new Scanner(System.in);
                 cadena[0] = consola.nextLine();
-                //String cadena = consola.nextLine();
                 for (int i = 0; i < suites.length; i++) {
                     if (suites[i].equals(cadena[0])) {
                         suiteAceptada = true;
@@ -49,10 +48,10 @@ public class Cliente {
                 if (!suiteAceptada) {
                     System.out.println("La Cipher Suite SLL que ha introducido no está disponible. Introduzca una de las listadas.");
                 }
-            } while (!suiteAceptada);*/
+            } while (!suiteAceptada);
             /***************************************************/
             SSLSocket SSLsocket = (SSLSocket) socketFactory.createSocket(host, puerto);
-            //    SSLsocket.setEnabledCipherSuites(cadena);
+              SSLsocket.setEnabledCipherSuites(cadena);
             SSLsocket.startHandshake();
             System.out.println("**** Conexion con el servidor correctamente establecida **** \n");
 
@@ -61,14 +60,15 @@ public class Cliente {
             sendObject = new ObjectOutputStream(SSLsocket.getOutputStream());
             receivedObject = new ObjectInputStream(SSLsocket.getInputStream());
 
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             System.out.println("****** Error al introducir las contraseñas o error en el HandShake\n" + e.getMessage());
+            e.printStackTrace();
             return;
         }
         seleccionarOpcion();
 
     }
-
 
     public static void seleccionarOpcion() {
         boolean exit = false;
@@ -147,7 +147,7 @@ public class Cliente {
             byte[] documento = new byte[tamaño];
             leer.readFully(documento);
             leer.close();
-            //doc.delete();
+            doc.delete();
             System.out.println("Documento leído");
             firmaCliente.FirmarDocumento(documento);
             boolean privado;
@@ -233,37 +233,39 @@ public class Cliente {
                 byte[] firmaTSA = writefirma.toByteArray();
                 writefirma.close();
                 boolean validoTSA = firmarcliente.verificarFirmaTSA(firmaTSA, respuesta.getFirmaTSA());
-                /*******Validar firma servidor****/
-                ByteArrayOutputStream escribirfirma = new ByteArrayOutputStream();
-                DataOutputStream escribir = new DataOutputStream(escribirfirma);
-                escribir.writeInt(idRegistro);
-                escribir.writeUTF(respuesta.getSelloTemporal());
-                escribir.write(respuesta.getDoc());
-                escribir.write(respuesta.getFirmaCliente());
+                if(validoTSA){
+                    /*******Validar firma servidor****/
+                    ByteArrayOutputStream escribirfirma = new ByteArrayOutputStream();
+                    DataOutputStream escribir = new DataOutputStream(escribirfirma);
+                    escribir.writeInt(idRegistro);
+                    escribir.writeUTF(respuesta.getSelloTemporal());
+                    escribir.write(respuesta.getDoc());
+                    escribir.write(respuesta.getFirmaCliente());
 
-                byte[] sigServ = escribirfirma.toByteArray();
-                escribirfirma.close();
-                boolean valida = firmarcliente.verificarServidor(sigServ, respuesta.getFirmaServidor());
-                if (valida) {
-                    /*******Firma servidor validada****/
+                    byte[] sigServ = escribirfirma.toByteArray();
+                    escribirfirma.close();
+                    boolean valida = firmarcliente.verificarServidor(sigServ, respuesta.getFirmaServidor());
+                    if (valida) {
+                        /*******Firma servidor validada****/
 
-                    File recuperado = new File("recuperado_" + respuesta.getIdRegistro() + "." + respuesta.getExtension());
-                    DataOutputStream nuevofichero = new DataOutputStream(new FileOutputStream(recuperado));
-                    nuevofichero.write(respuesta.getDoc());
-                    nuevofichero.close();
+                        File recuperado = new File("recuperado_" + respuesta.getIdRegistro() + "." + respuesta.getExtension());
+                        DataOutputStream nuevofichero = new DataOutputStream(new FileOutputStream(recuperado));
+                        nuevofichero.write(respuesta.getDoc());
+                        nuevofichero.close();
 
-                    String concat = String.valueOf(idRegistro) + idPropietario;
-                    boolean ficherosIguales = ficherosIguales(respuesta.getDoc(), concat);
-                    /*********************Comprobar hash del documento almacenado y del recuperado*************************/
-                    if (ficherosIguales) {
-                        System.out.println("Documento recuperado correctamente");
-                        System.out.println("IdRegistro: " + respuesta.getIdRegistro());
-                        System.out.println("Sello temporal: " + respuesta.getSelloTemporal());
-                        System.out.println("Firma del servidor: " + respuesta.getFirmaServidor().toString());
-                    } else {
-                        System.out.println("Documento alterado por el registrador");
+                        String concat = String.valueOf(idRegistro) + idPropietario;
+                        boolean ficherosIguales = ficherosIguales(respuesta.getDoc(), concat);
+                        /*********************Comprobar hash del documento almacenado y del recuperado*************************/
+                        if (ficherosIguales) {
+                            System.out.println("Documento recuperado correctamente");
+                            System.out.println("IdRegistro: " + respuesta.getIdRegistro());
+                            System.out.println("Sello temporal: " + respuesta.getSelloTemporal());
+                            System.out.println("Firma del servidor: " + respuesta.getFirmaServidor().toString());
+                        } else {
+                            System.out.println("Documento alterado por el registrador");
+                        }
+                        //Ya se imprime el error en la funcion de validar
                     }
-                    //Ya se imprime el error en la funcion de validar
                 }
             } else {
                 int error = respuesta.getMensaje();
@@ -365,12 +367,12 @@ public class Cliente {
         Scanner consola = new Scanner(System.in);
         String cadena = consola.nextLine();
         String[] aux = cadena.split(" ");
-        //String keystrore = aux[0];
-        //String truststore = aux[2];
-        String passwKS = aux[0];
-        String passwTS = aux[1];
-        String pathkeystore = "keystores/clientekeystore.jce";
-        String pathtruststore = "keystores/clientetruststore.jce";
+        String keystore = aux[0];
+        String truststore = aux[2];
+        String passwKS = aux[1];
+        String passwTS = aux[3];
+        String pathkeystore = "keystores/" + keystore;
+        String pathtruststore = "keystores/" + truststore;
 
         // Tipo de KeyStore usados
         System.setProperty("javax.net.ssl.keyStoreType", "JCEKS");

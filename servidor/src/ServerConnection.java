@@ -107,7 +107,6 @@ public class ServerConnection extends Thread {
 
                 String selloTemporal = selloTemporalTSA.getSelloTemporal();
                 /*********************FIN OBTENCION DEL SELLO TEMPORAL CON EL TSA**************************/
-                //  String selloTemporal = new Date().toString();
                 /*************Verifican firma cliente*********************/
                 boolean validoFirmaDoc = firmarSVerificarC.verificarFirmaCliente(peticion.getDocumento(), peticion.getFirmaDoc());
                 if (validoFirmaDoc) {
