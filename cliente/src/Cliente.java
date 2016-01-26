@@ -62,8 +62,8 @@ public class Cliente {
 
         }
         catch (IOException e) {
-            System.out.println("****** Error al introducir las contraseñas o error en el HandShake\n" + e.getMessage());
-            e.printStackTrace();
+            System.out.println("****** Error al introducir las contraseñas, error en el HandShake o CipherSuite no soportada\n" + e.getMessage());
+            //e.printStackTrace();
             return;
         }
         seleccionarOpcion();

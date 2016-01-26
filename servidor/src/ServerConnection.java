@@ -231,7 +231,7 @@ public class ServerConnection extends Thread {
                     byte[] docRec = provisional.getDoc();
                     RespuestaRecuperar respuesta = new RespuestaRecuperar(idRegistro, 0, provisional.getExtension(), docRec, provisional.getFirmaServidor(), provisional.getFirmaCliente(), provisional.getFirmaTSA(), provisional.getSelloTemporal(), true);
                     sendObject.writeObject(respuesta);
-                    System.out.println("(no validar cliente) Documento recuperado correctamente\nEnviando respuesta...\n");
+                    System.out.println("Documento recuperado correctamente\nEnviando respuesta...\n");
                 }
 
             } else {

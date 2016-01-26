@@ -1,4 +1,4 @@
 REGISTRAR_DOCUMENTO guima foto3.jpg privado
-REGISTRAR_DOCUMENTO pires foto4.jpg publico
+REGISTRAR_DOCUMENTO pires SEGAUDIO.m4a publico
 LISTAR_DOCUMENTOS ruth
 EXIT
